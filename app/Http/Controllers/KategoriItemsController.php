@@ -25,7 +25,8 @@ class KategoriItemsController extends Controller
         if (!empty($kode)) $data_search = $data_search->where('kode', 'LIKE', '%' . $kode . '%');
         if (!empty($nama)) $data_search = $data_search->where('nama', 'LIKE', '%' . $nama . '%');
 
-        $data_search = $data_search->withCount('items')->select('id', 'kode', 'nama')->orderBy('id')->get();
+        // select() dulu: select() sesudah withCount() mengganti daftar kolom dan membuang items_count
+        $data_search = $data_search->select('id', 'kode', 'nama')->withCount('items')->orderBy('id')->get();
 
         return json_encode([
             'status' => 200,
