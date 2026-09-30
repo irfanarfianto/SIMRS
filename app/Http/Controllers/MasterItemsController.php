@@ -8,7 +8,6 @@ use App\Models\MasterItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
 class MasterItemsController extends Controller
@@ -147,7 +146,8 @@ class MasterItemsController extends Controller
     private function uploadFoto($file)
     {
         $folder = 'uploads/master-items';
-        $nama_file = time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+        // Ekstensi dari isi berkas, bukan dari nama kiriman klien: gambar bernama x.html tidak boleh tersimpan sebagai .html
+        $nama_file = $file->hashName();
         $file->move(public_path($folder), $nama_file);
         return $folder . '/' . $nama_file;
     }
