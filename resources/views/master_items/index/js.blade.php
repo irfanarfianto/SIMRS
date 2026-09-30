@@ -31,6 +31,10 @@
         window.location.href = $(this).attr('href') + '?' + params;
     })
 
+    function escapeHtml(text) {
+        return $('<div>').text(text).html();
+    }
+
     function getData(){
         
         $('#loading-filter').show();
@@ -56,20 +60,21 @@
                 var data = results.data
 
                 $.each(data, function(index, item) {
-                    array_temp = [];
                     var harga_jual = item.harga_beli + item.harga_beli * item.laba / 100;
                     harga_jual = Math.round(harga_jual)
-                    var kode = item.kode;
 
-                    var html = `<a href="{{url('master-items/view/')}}/` + kode + `" class="btn btn-primary">View</a>`
+                    var html = `<a href="{{url('master-items/view/')}}/` + encodeURIComponent(item.kode) + `" class="btn btn-primary">View</a>`
 
-                    $.each(item, function(obj_name, obj_value) {
-                        if (obj_name == 'laba') return false;
-                        array_temp.push(obj_value)
-                    })
-                    array_temp.push(harga_jual)
-                    array_temp.push(item.supplier)
-                    array_temp.push(html)
+                    // Kolom ditulis eksplisit dan teks di-escape: DataTables merender isi sel sebagai HTML
+                    var array_temp = [
+                        escapeHtml(item.kode),
+                        escapeHtml(item.nama),
+                        escapeHtml(item.jenis),
+                        item.harga_beli,
+                        harga_jual,
+                        escapeHtml(item.supplier),
+                        html
+                    ];
 
 
                     dataTableObj.row.add(array_temp).draw(true);
