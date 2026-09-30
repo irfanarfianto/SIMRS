@@ -58,6 +58,20 @@
     </div>
 
     <div class="form-group">
+        <label>Kategori</label>
+        <div>
+            @forelse($list_kategori as $kategori)
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="kategori[]" id="kategori-{{ $kategori->id }}" value="{{ $kategori->id }}" @if(in_array($kategori->id, $kategori_terpilih)) checked @endif>
+                <label class="form-check-label" for="kategori-{{ $kategori->id }}">{{ $kategori->nama }}</label>
+            </div>
+            @empty
+            <small class="text-muted">Belum ada kategori. <a href="{{ url('kategori-items/form/new') }}">Buat kategori baru</a></small>
+            @endforelse
+        </div>
+    </div>
+
+    <div class="form-group">
         <label>Foto</label>
         @if(!empty($item->foto))
         <div class="mb-2">

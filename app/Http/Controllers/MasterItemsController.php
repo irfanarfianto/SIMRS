@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KategoriItem;
 use App\Models\MasterItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -42,16 +43,18 @@ class MasterItemsController extends Controller
         if ($method == 'new') {
             $item = [];
         } else {
-            $item = MasterItem::find($id);
+            $item = MasterItem::with('kategori')->find($id);
         }
         $data['item'] = $item;
         $data['method'] = $method;
+        $data['list_kategori'] = KategoriItem::orderBy('nama')->get();
+        $data['kategori_terpilih'] = old('kategori', $item ? $item->kategori->pluck('id')->all() : []);
         return view('master_items.form.index', $data);
     }
 
     public function singleView($kode)
     {
-        $data['data'] = MasterItem::where('kode', $kode)->first();
+        $data['data'] = MasterItem::with('kategori')->where('kode', $kode)->first();
         return view('master_items.single.index', $data);
     }
 
@@ -59,6 +62,8 @@ class MasterItemsController extends Controller
     {
         $request->validate([
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'kategori' => 'nullable|array',
+            'kategori.*' => 'exists:kategori_items,id',
         ]);
 
         if ($method == 'new') {
@@ -86,6 +91,7 @@ class MasterItemsController extends Controller
         }
 
         $data_item->save();
+        $data_item->kategori()->sync($request->input('kategori', []));
 
         return redirect('master-items');
     }
