@@ -1,26 +1,24 @@
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+@include('layouts.partials.datatables')
 
 <script>
     $(document).ready(function() {
         $('#table').DataTable({
-            searching: false,
             order: [[0, 'asc']],
+            columnDefs: [{
+                targets: [2],
+                className: 'text-end'
+            }, {
+                targets: [3],
+                orderable: false
+            }]
         });
+        pasangFilter(getData);
         getData()
     });
 
-    $('.btn-get-data').click(function() {
-        getData()
-    })
-
-    function escapeHtml(text) {
-        return $('<div>').text(text).html();
-    }
-
     function getData() {
-        $('#loading-filter').show();
+        setLoading(true);
+        $('#pesan-error').addClass('d-none');
         var dataTableObj = $('#table').DataTable();
         dataTableObj.clear().draw();
 
@@ -35,7 +33,7 @@
             },
             success: function(results) {
                 $.each(results.data, function(index, item) {
-                    var html = `<a href="{{url('kategori-items/view/')}}/` + item.id + `" class="btn btn-primary">View</a>`
+                    var html = `<a href="{{url('kategori-items/view/')}}/` + item.id + `" class="btn btn-primary btn-sm">View</a>`
                     dataTableObj.row.add([
                         escapeHtml(item.kode),
                         escapeHtml(item.nama),
@@ -44,7 +42,7 @@
                     ]);
                 });
                 dataTableObj.draw();
-                $('#loading-filter').hide();
+                setLoading(false);
             },
             error: function(xhr, textStatus, errorThrown) {
                 this.tryCount++;
@@ -52,8 +50,8 @@
                     $.ajax(this);
                     return;
                 }
-                alert('Terjadi kesalahan server, tidak dapat mengambil data')
-                $('#loading-filter').hide();
+                $('#pesan-error').removeClass('d-none');
+                setLoading(false);
             }
         })
     }

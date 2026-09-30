@@ -1,31 +1,22 @@
-<div id="filter-container">
+<form id="filter-form" class="mb-3" novalidate>
     <h4>Filter</h4>
-    <div class="row">
-        <div class="col-4">
-            <div class="form-group" id="filter-container">
-                <label>Kode</label>
-                <input type="text" class="form-control" id="filter-kode">
-            </div>
+    <div class="row g-2">
+        <div class="col-12 col-sm-6 col-lg-3">
+            <label for="filter-kode" class="form-label mb-1">Kode</label>
+            <input type="text" class="form-control" id="filter-kode" autocomplete="off">
         </div>
-        <div class="col-4">
-            <div class="form-group" id="filter-container">
-                <label>Nama</label>
-                <input type="text" class="form-control" id="filter-nama">
-            </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+            <label for="filter-nama" class="form-label mb-1">Nama</label>
+            <input type="text" class="form-control" id="filter-nama" autocomplete="off">
         </div>
-        <div class="col-2">
-            <div class="form-group" id="filter-container">
-                <label>Harga Min</label>
-                <input type="number" class="form-control" id="filter-harga-min">
-            </div>
+        <div class="col-6 col-lg-3">
+            <label for="filter-harga-min" class="form-label mb-1">Harga Min</label>
+            <input type="number" class="form-control" id="filter-harga-min" min="0" inputmode="numeric">
         </div>
-        <div class="col-2">
-            <div class="form-group" id="filter-container">
-                <label>Harga Max</label>
-                <input type="number" class="form-control" id="filter-harga-max">
-            </div>
+        <div class="col-6 col-lg-3">
+            <label for="filter-harga-max" class="form-label mb-1">Harga Max</label>
+            <input type="number" class="form-control" id="filter-harga-max" min="0" inputmode="numeric">
         </div>
     </div>
-    <button class="btn btn-primary mt-1 btn-get-data">Filter</button>
-    <span id="loading-filter" style="display: none;">Loading...</span>
-</div>
+    @include('layouts.partials.filter-aksi')
+</form>

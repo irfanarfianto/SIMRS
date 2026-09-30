@@ -3,8 +3,8 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="form-group mb-2">
+        <div class="col-12 col-lg-10">
+            <div class="d-flex flex-wrap gap-2 mb-2">
                 <a href="{{url('master-items/form/new')}}" class="btn btn-secondary">+ Master Items Baru</a>
                 <a href="{{url('master-items/export-excel')}}" class="btn btn-success btn-export-excel">Download Excel</a>
             </div>

@@ -1,19 +1,14 @@
-<div id="filter-container">
+<form id="filter-form" class="mb-3" novalidate>
     <h4>Filter</h4>
-    <div class="row">
-        <div class="col-6">
-            <div class="form-group">
-                <label>Nama</label>
-                <input type="text" class="form-control" id="filter-nama">
-            </div>
+    <div class="row g-2">
+        <div class="col-12 col-sm-6">
+            <label for="filter-nama" class="form-label mb-1">Nama</label>
+            <input type="text" class="form-control" id="filter-nama" autocomplete="off">
         </div>
-        <div class="col-6">
-            <div class="form-group">
-                <label>Kode</label>
-                <input type="text" class="form-control" id="filter-kode">
-            </div>
+        <div class="col-12 col-sm-6">
+            <label for="filter-kode" class="form-label mb-1">Kode</label>
+            <input type="text" class="form-control" id="filter-kode" autocomplete="off">
         </div>
     </div>
-    <button class="btn btn-primary mt-1 btn-get-data">Filter</button>
-    <span id="loading-filter" style="display: none;">Loading...</span>
-</div>
+    @include('layouts.partials.filter-aksi')
+</form>
