@@ -11,6 +11,11 @@
                 <div class="card-header">Master Item</div>
 
                 <div class="card-body">
+                    @if(!empty($data->foto))
+                    <div class="mb-3">
+                        <img src="{{ asset($data->foto) }}" alt="Foto {{ $data->nama }}" class="img-thumbnail" style="max-height: 200px;">
+                    </div>
+                    @endif
                     <table>
                         <tr>
                             <th>Nama</th>

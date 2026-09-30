@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\MasterItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class MasterItemsController extends Controller
 {
@@ -55,6 +57,10 @@ class MasterItemsController extends Controller
 
     public function formSubmit(Request $request, $method, $id = 0)
     {
+        $request->validate([
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ]);
+
         if ($method == 'new') {
             $data_item = new MasterItem;
             $kode = MasterItem::count('id');
@@ -72,6 +78,13 @@ class MasterItemsController extends Controller
         $data_item->kode = $kode;
         $data_item->supplier = $request->supplier;
         $data_item->jenis = $request->jenis;
+
+        if ($request->hasFile('foto')) {
+            $foto_lama = $data_item->foto;
+            $data_item->foto = $this->uploadFoto($request->file('foto'));
+            if (!empty($foto_lama) && File::exists(public_path($foto_lama))) File::delete(public_path($foto_lama));
+        }
+
         $data_item->save();
 
         return redirect('master-items');
@@ -98,6 +111,14 @@ class MasterItemsController extends Controller
             $item->jenis = $this->getRandomJenis();
             $item->save();
         }
+    }
+
+    private function uploadFoto($file)
+    {
+        $folder = 'uploads/master-items';
+        $nama_file = time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path($folder), $nama_file);
+        return $folder . '/' . $nama_file;
     }
 
     private function getRandomSupplier()

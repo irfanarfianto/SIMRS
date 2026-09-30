@@ -1,5 +1,14 @@
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
     @csrf
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
     @if($method == 'edit')
     <div class="form-group">
         <label>Kode Barang</label>
@@ -46,6 +55,17 @@
             <option @if($selected == 'Umum') selected @endif>Umum</option>
             <option @if($selected == 'ATK') selected @endif>ATK</option>
         </select>
+    </div>
+
+    <div class="form-group">
+        <label>Foto</label>
+        @if(!empty($item->foto))
+        <div class="mb-2">
+            <img src="{{ asset($item->foto) }}" alt="Foto {{ $item->nama }}" class="img-thumbnail" style="max-height: 150px;">
+        </div>
+        @endif
+        <input type="file" class="form-control" name="foto" accept="image/png, image/jpeg, image/webp">
+        <small class="text-muted">Format JPG, PNG, atau WEBP, maksimal 2 MB.@if(!empty($item->foto)) Kosongkan bila tidak ingin mengganti foto.@endif</small>
     </div>
 
     <button class="btn btn-primary mt-3">Submit</button>
