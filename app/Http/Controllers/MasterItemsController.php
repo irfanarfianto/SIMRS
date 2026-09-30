@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\MasterItemsExport;
 use App\Models\KategoriItem;
 use App\Models\MasterItem;
-use App\Support\SimpleXlsx;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MasterItemsController extends Controller
 {
@@ -29,27 +30,8 @@ class MasterItemsController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $data_items = $this->filterQuery($request)->with('kategori')->orderBy('id')->get();
-
-        $rows = [];
-        foreach ($data_items as $index => $item) {
-            $rows[] = [
-                $index + 1,
-                $item->kategori->pluck('nama')->implode(', '),
-                $item->nama,
-                $item->supplier,
-                (int) $item->harga_beli,
-                (int) $item->laba,
-                (int) round($item->harga_beli + $item->harga_beli * $item->laba / 100),
-            ];
-        }
-
-        $header = ['No', 'Nama Kategori', 'Nama Items', 'Nama Supplier', 'Harga', 'Laba (%)', 'Harga Jual'];
-        $path = SimpleXlsx::build('Master Items', $header, $rows, [4, 6]);
-
-        return response()->download($path, 'master-items-' . now()->timezone('Asia/Jakarta')->format('Ymd-His') . '.xlsx', [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ])->deleteFileAfterSend(true);
+        $nama_file = 'master-items-' . now()->timezone('Asia/Jakarta')->format('Ymd-His') . '.xlsx';
+        return Excel::download(new MasterItemsExport($this->filterQuery($request)), $nama_file);
     }
 
     private function filterQuery(Request $request)
