@@ -2,8 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\MasterItemsExport;
+use App\Models\KategoriItem;
 use App\Models\MasterItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MasterItemsController extends Controller
 {
@@ -14,19 +21,7 @@ class MasterItemsController extends Controller
 
     public function search(Request $request)
     {
-        $kode = $request->kode;
-        $nama = $request->nama;
-        $hargamin = $request->hargamin;
-        $hargamax = $request->hargamax;
-
-        $data_search = MasterItem::query();
-
-        if (!empty($kode)) $data_search = $data_search->where('kode', $kode);
-        if (!empty($nama)) $data_search = $data_search->where('nama', 'LIKE', '%' . $nama . '%');
-        if (!empty($hargamin)) $data_search = $data_search->where('harga_beli', '>=', $hargamin)->where('harga_beli', '<=', $hargamax);
-
-        $data_search = $data_search->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier')->orderBy('id')->get();
-
+        $data_search = $this->filterQuery($request)->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier')->orderBy('id')->get()->append('harga_jual');
 
         return json_encode([
             'status' => 200,
@@ -34,52 +29,119 @@ class MasterItemsController extends Controller
         ]);
     }
 
+    public function exportExcel(Request $request)
+    {
+        $nama_file = 'master-items-' . now()->timezone('Asia/Jakarta')->format('Ymd-His') . '.xlsx';
+        return Excel::download(new MasterItemsExport($this->filterQuery($request)), $nama_file);
+    }
+
+    private function filterQuery(Request $request)
+    {
+        $kode = $request->kode;
+        $nama = $request->nama;
+        $hargamin = $request->hargamin;
+        $hargamax = $request->hargamax;
+
+        $data_search = MasterItem::query();
+
+        if (!empty($kode)) $data_search = $data_search->where('kode', 'LIKE', '%' . $kode . '%');
+        if (!empty($nama)) $data_search = $data_search->where('nama', 'LIKE', '%' . $nama . '%');
+        if (is_numeric($hargamin)) $data_search = $data_search->where('harga_beli', '>=', $hargamin);
+        if (is_numeric($hargamax)) $data_search = $data_search->where('harga_beli', '<=', $hargamax);
+
+        return $data_search;
+    }
+
     public function formView($method, $id = 0)
     {
+        abort_unless(in_array($method, ['new', 'edit']), 404);
+
         if ($method == 'new') {
             $item = [];
         } else {
-            $item = MasterItem::find($id);
+            $item = MasterItem::with('kategori')->find($id);
+            if (!$item) return redirect('master-items')->with('error', 'Item tidak ditemukan, mungkin sudah dihapus.');
         }
         $data['item'] = $item;
+        $data['daftar_supplier'] = MasterItem::DAFTAR_SUPPLIER;
+        $data['daftar_jenis'] = MasterItem::DAFTAR_JENIS;
         $data['method'] = $method;
+        $data['list_kategori'] = KategoriItem::orderBy('nama')->get();
+        // Item baru dari halaman kategori (?kategori=<id>): kategori itu langsung tercentang
+        $kategori_awal = $item ? $item->kategori->pluck('id')->all() : array_filter([(int) request('kategori')]);
+        $data['kategori_terpilih'] = old('kategori', $kategori_awal);
         return view('master_items.form.index', $data);
     }
 
     public function singleView($kode)
     {
-        $data['data'] = MasterItem::where('kode', $kode)->first();
+        $data['data'] = MasterItem::with('kategori')->where('kode', $kode)->first();
+        if (!$data['data']) return redirect('master-items')->with('error', 'Item dengan kode ' . $kode . ' tidak ditemukan.');
         return view('master_items.single.index', $data);
     }
 
     public function formSubmit(Request $request, $method, $id = 0)
     {
+        abort_unless(in_array($method, ['new', 'edit']), 404);
+
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'harga_beli' => 'required|integer|min:0|max:2000000000',
+            'laba' => 'required|integer|min:0|max:1000',
+            'supplier' => ['required', Rule::in(MasterItem::DAFTAR_SUPPLIER)],
+            'jenis' => ['required', Rule::in(MasterItem::DAFTAR_JENIS)],
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'kategori' => 'nullable|array',
+            'kategori.*' => 'exists:kategori_items,id',
+        ], [], [
+            'harga_beli' => 'harga beli',
+        ]);
+
         if ($method == 'new') {
             $data_item = new MasterItem;
-            $kode = MasterItem::count('id');
-            $kode = $kode + 1;
-            $kode = str_pad($kode, 5, '0', STR_PAD_LEFT);
-            sleep(3);
+            // sementara; kode final diturunkan dari id setelah insert
+            $data_item->kode = '';
         } else {
             $data_item = MasterItem::find($id);
-            $kode = $data_item->kode;
+            if (!$data_item) return redirect('master-items')->with('error', 'Item tidak ditemukan, mungkin sudah dihapus.');
         }
 
         $data_item->nama = $request->nama;
         $data_item->harga_beli = $request->harga_beli;
         $data_item->laba = $request->laba;
-        $data_item->kode = $kode;
         $data_item->supplier = $request->supplier;
         $data_item->jenis = $request->jenis;
-        $data_item->save();
 
-        return redirect('master-items');
+        if ($request->hasFile('foto')) {
+            $foto_lama = $data_item->foto;
+            $data_item->foto = $this->uploadFoto($request->file('foto'));
+            if (!empty($foto_lama) && File::exists(public_path($foto_lama))) File::delete(public_path($foto_lama));
+        }
+
+        DB::transaction(function () use ($data_item, $request) {
+            $data_item->save();
+
+            // Kode dari id auto-increment: unik walau ada item yang di-soft-delete atau submit bersamaan
+            // (sebelumnya count + 1, yang menghasilkan kode kembar setelah ada item terhapus).
+            if ($data_item->kode === '') {
+                $data_item->kode = str_pad($data_item->id, 5, '0', STR_PAD_LEFT);
+                $data_item->save();
+            }
+
+            $data_item->kategori()->sync($request->input('kategori', []));
+        });
+
+        $pesan = $method == 'new' ? 'Item ' . $data_item->nama . ' berhasil ditambahkan.' : 'Item ' . $data_item->nama . ' berhasil diperbarui.';
+        return redirect('master-items/view/' . $data_item->kode)->with('success', $pesan);
     }
 
     public function delete($id)
     {
-        MasterItem::find($id)->delete();
-        return redirect('master-items');
+        $data_item = MasterItem::find($id);
+        if (!$data_item) return redirect('master-items')->with('error', 'Item tidak ditemukan, mungkin sudah dihapus.');
+
+        $data_item->delete();
+        return redirect('master-items')->with('success', 'Item ' . $data_item->nama . ' berhasil dihapus.');
     }
 
     public function updateRandomData()
@@ -99,17 +161,22 @@ class MasterItemsController extends Controller
         }
     }
 
+    private function uploadFoto($file)
+    {
+        $folder = 'uploads/master-items';
+        // Ekstensi dari isi berkas, bukan dari nama kiriman klien: gambar bernama x.html tidak boleh tersimpan sebagai .html
+        $nama_file = $file->hashName();
+        $file->move(public_path($folder), $nama_file);
+        return $folder . '/' . $nama_file;
+    }
+
     private function getRandomSupplier()
     {
-        $array = ['Tokopaedi','Bukulapuk','TokoBagas','E Commurz','Blublu'];
-        $random = rand(0,4);
-        return $array[$random];
+        return Arr::random(MasterItem::DAFTAR_SUPPLIER);
     }
 
     private function getRandomJenis()
     {
-        $array = ['Obat','Alkes','Matkes','Umum','ATK'];
-        $random = rand(0,4);
-        return $array[$random];
+        return Arr::random(MasterItem::DAFTAR_JENIS);
     }
 }

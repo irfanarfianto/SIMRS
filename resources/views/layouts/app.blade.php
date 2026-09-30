@@ -32,7 +32,17 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
-
+                        @auth
+                        <li class="nav-item">
+                            <a class="nav-link @if(request()->is('master-items*')) active @endif" href="{{ url('master-items') }}">Master Items</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @if(request()->is('kategori-items*')) active @endif" href="{{ url('kategori-items') }}">Kategori Items</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url('master-items/export-excel') }}">Download Excel Master Items</a>
+                        </li>
+                        @endauth
                     </ul>
 
                     <!-- Right Side Of Navbar -->
@@ -77,6 +87,9 @@
             @yield('content')
         </main>
     </div>
+    @include('layouts.partials.toast')
+    @include('layouts.partials.confirm-delete')
+    @include('layouts.partials.cegah-submit-ganda')
     @yield('js')
 </body>
 
