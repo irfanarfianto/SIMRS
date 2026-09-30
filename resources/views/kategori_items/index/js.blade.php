@@ -20,9 +20,8 @@
         setLoading(true);
         $('#pesan-error').addClass('d-none');
         var dataTableObj = $('#table').DataTable();
-        dataTableObj.clear().draw();
 
-        $.ajax({
+        kirimFilter({
             url: '{{url("kategori-items/search")}}',
             dataType: 'json',
             tryCount: 0,
@@ -32,6 +31,7 @@
                 nama: $('#filter-nama').val()
             },
             success: function(results) {
+                dataTableObj.clear();
                 $.each(results.data, function(index, item) {
                     var html = `<a href="{{url('kategori-items/view/')}}/` + item.id + `" class="btn btn-primary btn-sm">View</a>`
                     dataTableObj.row.add([
@@ -45,9 +45,10 @@
                 setLoading(false);
             },
             error: function(xhr, textStatus, errorThrown) {
+                if (textStatus === 'abort') return; // dibatalkan oleh filter yang lebih baru
                 this.tryCount++;
                 if (this.tryCount <= this.retryLimit) {
-                    $.ajax(this);
+                    kirimFilter(this);
                     return;
                 }
                 $('#pesan-error').removeClass('d-none');

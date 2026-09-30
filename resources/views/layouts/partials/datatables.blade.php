@@ -25,16 +25,32 @@
         return $('<div>').text(text).html();
     }
 
-    // Filter: Enter di input mana pun menjalankan filter, tombol Reset mengosongkan lalu memuat ulang
+    // Filter: berjalan otomatis 400 md setelah berhenti mengetik; Enter/tombol Filter langsung;
+    // Reset mengosongkan lalu memuat ulang
     function pasangFilter(getData) {
+        var jeda;
+        $('#filter-form').on('input', 'input', function() {
+            clearTimeout(jeda);
+            jeda = setTimeout(getData, 400);
+        });
         $('#filter-form').on('submit', function(e) {
             e.preventDefault();
+            clearTimeout(jeda);
             getData();
         });
         $('#filter-reset').on('click', function() {
+            clearTimeout(jeda);
             $('#filter-form')[0].reset();
             getData();
         });
+    }
+
+    // Request filter sebelumnya dibatalkan: tanpa ini respons lama yang tiba belakangan
+    // menimpa tabel dengan hasil ketikan sebelumnya
+    var xhrFilter = null;
+    function kirimFilter(opsi) {
+        if (xhrFilter) xhrFilter.abort();
+        xhrFilter = $.ajax(opsi);
     }
 
     function setLoading(aktif) {

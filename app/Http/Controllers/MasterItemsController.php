@@ -44,7 +44,7 @@ class MasterItemsController extends Controller
 
         $data_search = MasterItem::query();
 
-        if (!empty($kode)) $data_search = $data_search->where('kode', $kode);
+        if (!empty($kode)) $data_search = $data_search->where('kode', 'LIKE', '%' . $kode . '%');
         if (!empty($nama)) $data_search = $data_search->where('nama', 'LIKE', '%' . $nama . '%');
         if (is_numeric($hargamin)) $data_search = $data_search->where('harga_beli', '>=', $hargamin);
         if (is_numeric($hargamax)) $data_search = $data_search->where('harga_beli', '<=', $hargamax);

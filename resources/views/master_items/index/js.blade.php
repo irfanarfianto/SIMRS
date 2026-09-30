@@ -35,9 +35,8 @@
         setLoading(true);
         $('#pesan-error').addClass('d-none');
         var dataTableObj = $('#table').DataTable();
-        dataTableObj.clear().draw();
 
-        $.ajax({
+        kirimFilter({
             url: '{{url("master-items/search")}}',
             dataType: 'json',
             tryCount: 0,
@@ -49,6 +48,7 @@
                 hargamax: $('#filter-harga-max').val()
             },
             success: function(results) {
+                dataTableObj.clear();
                 $.each(results.data, function(index, item) {
                     var html = `<a href="{{url('master-items/view/')}}/` + encodeURIComponent(item.kode) + `" class="btn btn-primary btn-sm">View</a>`
 
@@ -67,9 +67,10 @@
                 setLoading(false);
             },
             error: function(xhr, textStatus, errorThrown) {
+                if (textStatus === 'abort') return; // dibatalkan oleh filter yang lebih baru
                 this.tryCount++;
                 if (this.tryCount <= this.retryLimit) {
-                    $.ajax(this);
+                    kirimFilter(this);
                     return;
                 }
                 $('#pesan-error').removeClass('d-none');
