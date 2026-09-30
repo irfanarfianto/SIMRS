@@ -68,6 +68,7 @@ class MasterItemsController extends Controller
     public function singleView($kode)
     {
         $data['data'] = MasterItem::with('kategori')->where('kode', $kode)->first();
+        if (!$data['data']) return redirect('master-items')->with('error', 'Item dengan kode ' . $kode . ' tidak ditemukan.');
         return view('master_items.single.index', $data);
     }
 
@@ -85,6 +86,7 @@ class MasterItemsController extends Controller
             $data_item->kode = '';
         } else {
             $data_item = MasterItem::find($id);
+            if (!$data_item) return redirect('master-items')->with('error', 'Item tidak ditemukan, mungkin sudah dihapus.');
         }
 
         $data_item->nama = $request->nama;
@@ -112,13 +114,17 @@ class MasterItemsController extends Controller
             $data_item->kategori()->sync($request->input('kategori', []));
         });
 
-        return redirect('master-items');
+        $pesan = $method == 'new' ? 'Item ' . $data_item->nama . ' berhasil ditambahkan.' : 'Item ' . $data_item->nama . ' berhasil diperbarui.';
+        return redirect('master-items')->with('success', $pesan);
     }
 
     public function delete($id)
     {
-        MasterItem::find($id)->delete();
-        return redirect('master-items');
+        $data_item = MasterItem::find($id);
+        if (!$data_item) return redirect('master-items')->with('error', 'Item tidak ditemukan, mungkin sudah dihapus.');
+
+        $data_item->delete();
+        return redirect('master-items')->with('success', 'Item ' . $data_item->nama . ' berhasil dihapus.');
     }
 
     public function updateRandomData()

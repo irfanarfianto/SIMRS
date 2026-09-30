@@ -74,12 +74,16 @@ class KategoriItemsController extends Controller
         $data_kategori->nama = $request->nama;
         $data_kategori->save();
 
-        return redirect('kategori-items/view/' . $data_kategori->id);
+        $pesan = $method == 'new' ? 'Kategori ' . $data_kategori->nama . ' berhasil ditambahkan.' : 'Kategori ' . $data_kategori->nama . ' berhasil diperbarui.';
+        return redirect('kategori-items/view/' . $data_kategori->id)->with('success', $pesan);
     }
 
     public function delete($id)
     {
-        KategoriItem::findOrFail($id)->delete();
-        return redirect('kategori-items');
+        $data_kategori = KategoriItem::find($id);
+        if (!$data_kategori) return redirect('kategori-items')->with('error', 'Kategori tidak ditemukan, mungkin sudah dihapus.');
+
+        $data_kategori->delete();
+        return redirect('kategori-items')->with('success', 'Kategori ' . $data_kategori->nama . ' berhasil dihapus.');
     }
 }

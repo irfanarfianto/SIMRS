@@ -85,6 +85,8 @@
             @yield('content')
         </main>
     </div>
+    @include('layouts.partials.toast')
+    @include('layouts.partials.confirm-delete')
     @yield('js')
 </body>
 
