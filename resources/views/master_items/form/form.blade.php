@@ -11,50 +11,51 @@
     @endif
     @if($method == 'edit')
     <div class="form-group">
-        <label>Kode Barang</label>
-        <input type="text" class="form-control" name="kode_barang" required readonly value="{{$item->kode ?? ''}}">
+        <label for="kode_barang">Kode Barang</label>
+        <input type="text" class="form-control" id="kode_barang" name="kode_barang" readonly value="{{$item->kode ?? ''}}">
     </div>
     @endif
 
     <div class="form-group">
-        <label>Nama</label>
-        <input type="text" class="form-control" name="nama" required  value="{{$item->nama ?? ''}}">
+        <label for="nama">Nama</label>
+        <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama" name="nama" required maxlength="255" value="{{ old('nama', $item->nama ?? '') }}">
+        @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
     <div class="form-group">
-        <label>Harga Beli</label>
-        <input type="number" class="form-control" name="harga_beli" required  value="{{$item->harga_beli ?? ''}}">
+        <label for="harga_beli">Harga Beli</label>
+        <input type="number" class="form-control @error('harga_beli') is-invalid @enderror" id="harga_beli" name="harga_beli" required min="0" max="2000000000" step="1" value="{{ old('harga_beli', $item->harga_beli ?? '') }}">
+        @error('harga_beli')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
     <div class="form-group">
-        <label>Laba (dalam persen)</label>
-        <input type="number" class="form-control" name="laba" required  value="{{$item->laba ?? ''}}">
+        <label for="laba">Laba (dalam persen)</label>
+        <input type="number" class="form-control @error('laba') is-invalid @enderror" id="laba" name="laba" required min="0" max="1000" step="1" value="{{ old('laba', $item->laba ?? '') }}">
+        @error('laba')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
-    @php $selected = $item->supplier ?? ''; @endphp
+    @php $selected = old('supplier', $item->supplier ?? ''); @endphp
     <div class="form-group">
-        <label>Supplier</label>
-        <select class="form-control" required name="supplier">
+        <label for="supplier">Supplier</label>
+        <select class="form-control @error('supplier') is-invalid @enderror" required id="supplier" name="supplier">
             <option @if($selected == '') selected @endif value="">--Pilih--</option>
-            <option @if($selected == 'Tokopaedi') selected @endif>Tokopaedi</option>
-            <option @if($selected == 'Bukulapuk') selected @endif>Bukulapuk</option>
-            <option @if($selected == 'TokoBagas') selected @endif>TokoBagas</option>
-            <option @if($selected == 'E Commurz') selected @endif>E Commurz</option>
-            <option @if($selected == 'Blublu') selected @endif>Blublu</option>
+            @foreach($daftar_supplier as $supplier)
+            <option @if($selected == $supplier) selected @endif>{{ $supplier }}</option>
+            @endforeach
         </select>
+        @error('supplier')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
-    @php $selected = $item->jenis ?? ''; @endphp
+    @php $selected = old('jenis', $item->jenis ?? ''); @endphp
     <div class="form-group">
-        <label>Jenis</label>
-        <select class="form-control" required name="jenis">
+        <label for="jenis">Jenis</label>
+        <select class="form-control @error('jenis') is-invalid @enderror" required id="jenis" name="jenis">
             <option @if($selected == '') selected @endif value="">--Pilih--</option>
-            <option @if($selected == 'Obat') selected @endif>Obat</option>
-            <option @if($selected == 'Alkes') selected @endif>Alkes</option>
-            <option @if($selected == 'Matkes') selected @endif>Matkes</option>
-            <option @if($selected == 'Umum') selected @endif>Umum</option>
-            <option @if($selected == 'ATK') selected @endif>ATK</option>
+            @foreach($daftar_jenis as $jenis)
+            <option @if($selected == $jenis) selected @endif>{{ $jenis }}</option>
+            @endforeach
         </select>
+        @error('jenis')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
     <div class="form-group">
@@ -69,16 +70,18 @@
             <small class="text-muted">Belum ada kategori. <a href="{{ url('kategori-items/form/new') }}">Buat kategori baru</a></small>
             @endforelse
         </div>
+        @error('kategori.*')<div class="text-danger small">{{ $message }}</div>@enderror
     </div>
 
     <div class="form-group">
-        <label>Foto</label>
+        <label for="foto">Foto</label>
         @if(!empty($item->foto))
         <div class="mb-2">
             <img src="{{ asset($item->foto) }}" alt="Foto {{ $item->nama }}" class="img-thumbnail" style="max-height: 150px;">
         </div>
         @endif
-        <input type="file" class="form-control" name="foto" accept="image/png, image/jpeg, image/webp">
+        <input type="file" class="form-control @error('foto') is-invalid @enderror" id="foto" name="foto" accept="image/png, image/jpeg, image/webp">
+        @error('foto')<div class="invalid-feedback">{{ $message }}</div>@enderror
         <small class="text-muted">Format JPG, PNG, atau WEBP, maksimal 2 MB.@if(!empty($item->foto)) Kosongkan bila tidak ingin mengganti foto.@endif</small>
     </div>
 

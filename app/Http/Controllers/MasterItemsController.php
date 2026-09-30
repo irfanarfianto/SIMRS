@@ -6,6 +6,8 @@ use App\Exports\MasterItemsExport;
 use App\Models\KategoriItem;
 use App\Models\MasterItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Maatwebsite\Excel\Facades\Excel;
@@ -52,12 +54,17 @@ class MasterItemsController extends Controller
 
     public function formView($method, $id = 0)
     {
+        abort_unless(in_array($method, ['new', 'edit']), 404);
+
         if ($method == 'new') {
             $item = [];
         } else {
             $item = MasterItem::with('kategori')->find($id);
+            if (!$item) return redirect('master-items')->with('error', 'Item tidak ditemukan, mungkin sudah dihapus.');
         }
         $data['item'] = $item;
+        $data['daftar_supplier'] = MasterItem::DAFTAR_SUPPLIER;
+        $data['daftar_jenis'] = MasterItem::DAFTAR_JENIS;
         $data['method'] = $method;
         $data['list_kategori'] = KategoriItem::orderBy('nama')->get();
         $data['kategori_terpilih'] = old('kategori', $item ? $item->kategori->pluck('id')->all() : []);
@@ -73,10 +80,19 @@ class MasterItemsController extends Controller
 
     public function formSubmit(Request $request, $method, $id = 0)
     {
+        abort_unless(in_array($method, ['new', 'edit']), 404);
+
         $request->validate([
+            'nama' => 'required|string|max:255',
+            'harga_beli' => 'required|integer|min:0|max:2000000000',
+            'laba' => 'required|integer|min:0|max:1000',
+            'supplier' => ['required', Rule::in(MasterItem::DAFTAR_SUPPLIER)],
+            'jenis' => ['required', Rule::in(MasterItem::DAFTAR_JENIS)],
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'kategori' => 'nullable|array',
             'kategori.*' => 'exists:kategori_items,id',
+        ], [], [
+            'harga_beli' => 'harga beli',
         ]);
 
         if ($method == 'new') {
@@ -154,15 +170,11 @@ class MasterItemsController extends Controller
 
     private function getRandomSupplier()
     {
-        $array = ['Tokopaedi','Bukulapuk','TokoBagas','E Commurz','Blublu'];
-        $random = rand(0,4);
-        return $array[$random];
+        return Arr::random(MasterItem::DAFTAR_SUPPLIER);
     }
 
     private function getRandomJenis()
     {
-        $array = ['Obat','Alkes','Matkes','Umum','ATK'];
-        $random = rand(0,4);
-        return $array[$random];
+        return Arr::random(MasterItem::DAFTAR_JENIS);
     }
 }
