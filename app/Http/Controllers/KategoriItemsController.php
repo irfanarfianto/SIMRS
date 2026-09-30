@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\KategoriItem;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class KategoriItemsController extends Controller
@@ -47,6 +49,16 @@ class KategoriItemsController extends Controller
     {
         $data['data'] = KategoriItem::with(['items' => fn($query) => $query->orderBy('kode')])->findOrFail($id);
         return view('kategori_items.single.index', $data);
+    }
+
+    public function downloadPdf($id)
+    {
+        $data['data'] = KategoriItem::with(['items' => fn($query) => $query->orderBy('kode')])->findOrFail($id);
+        $data['dicetak_pada'] = now()->timezone('Asia/Jakarta');
+
+        return Pdf::loadView('kategori_items.pdf', $data)
+            ->setPaper('a4', 'portrait')
+            ->download('kategori-' . Str::slug($data['data']->kode) . '.pdf');
     }
 
     public function formSubmit(Request $request, $method, $id = 0)

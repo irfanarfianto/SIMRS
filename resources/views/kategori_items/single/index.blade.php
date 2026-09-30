@@ -24,6 +24,7 @@
                         </tr>
                     </table>
                     <a class="btn btn-info" href="{{url('kategori-items/form/edit')}}/{{$data->id}}">Edit</a>
+                    <a class="btn btn-success" href="{{url('kategori-items/pdf')}}/{{$data->id}}">Download PDF</a>
                     <a class="btn btn-danger" href="{{url('kategori-items/delete')}}/{{$data->id}}" onclick="return confirm('Are you sure you want to delete this category?');">Delete</a>
 
                     <h5 class="mt-4">Daftar Item ({{ $data->items->count() }})</h5>
