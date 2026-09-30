@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\KategoriItem;
 use App\Models\MasterItem;
+use App\Support\SimpleXlsx;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -17,6 +18,41 @@ class MasterItemsController extends Controller
 
     public function search(Request $request)
     {
+        $data_search = $this->filterQuery($request)->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier')->orderBy('id')->get();
+
+        return json_encode([
+            'status' => 200,
+            'data' => $data_search
+        ]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $data_items = $this->filterQuery($request)->with('kategori')->orderBy('id')->get();
+
+        $rows = [];
+        foreach ($data_items as $index => $item) {
+            $rows[] = [
+                $index + 1,
+                $item->kategori->pluck('nama')->implode(', '),
+                $item->nama,
+                $item->supplier,
+                (int) $item->harga_beli,
+                (int) $item->laba,
+                (int) round($item->harga_beli + $item->harga_beli * $item->laba / 100),
+            ];
+        }
+
+        $header = ['No', 'Nama Kategori', 'Nama Items', 'Nama Supplier', 'Harga', 'Laba (%)', 'Harga Jual'];
+        $path = SimpleXlsx::build('Master Items', $header, $rows, [4, 6]);
+
+        return response()->download($path, 'master-items-' . now()->timezone('Asia/Jakarta')->format('Ymd-His') . '.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
+    }
+
+    private function filterQuery(Request $request)
+    {
         $kode = $request->kode;
         $nama = $request->nama;
         $hargamin = $request->hargamin;
@@ -29,13 +65,7 @@ class MasterItemsController extends Controller
         if (is_numeric($hargamin)) $data_search = $data_search->where('harga_beli', '>=', $hargamin);
         if (is_numeric($hargamax)) $data_search = $data_search->where('harga_beli', '<=', $hargamax);
 
-        $data_search = $data_search->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier')->orderBy('id')->get();
-
-
-        return json_encode([
-            'status' => 200,
-            'data' => $data_search
-        ]);
+        return $data_search;
     }
 
     public function formView($method, $id = 0)

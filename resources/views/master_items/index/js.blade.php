@@ -20,6 +20,17 @@
         getData()
     })
 
+    $('.btn-export-excel').click(function(e) {
+        e.preventDefault();
+        var params = $.param({
+            kode: $('#filter-kode').val(),
+            nama: $('#filter-nama').val(),
+            hargamin: $('#filter-harga-min').val(),
+            hargamax: $('#filter-harga-max').val()
+        });
+        window.location.href = $(this).attr('href') + '?' + params;
+    })
+
     function getData(){
         
         $('#loading-filter').show();
