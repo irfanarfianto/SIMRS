@@ -12,6 +12,14 @@
         $('#table').DataTable({
             searching: false,
             order: [[0, 'desc']],
+            columnDefs: [{
+                // Harga Beli & Harga Jual: tampil berformat ribuan, sort tetap pakai angka mentah
+                targets: [3, 4],
+                className: 'text-end',
+                render: function(data, type) {
+                    return type === 'display' ? 'Rp ' + Number(data).toLocaleString('id-ID') : data;
+                }
+            }]
         });
         getData()
     });
@@ -60,9 +68,6 @@
                 var data = results.data
 
                 $.each(data, function(index, item) {
-                    var harga_jual = item.harga_beli + item.harga_beli * item.laba / 100;
-                    harga_jual = Math.round(harga_jual)
-
                     var html = `<a href="{{url('master-items/view/')}}/` + encodeURIComponent(item.kode) + `" class="btn btn-primary">View</a>`
 
                     // Kolom ditulis eksplisit dan teks di-escape: DataTables merender isi sel sebagai HTML
@@ -71,7 +76,7 @@
                         escapeHtml(item.nama),
                         escapeHtml(item.jenis),
                         item.harga_beli,
-                        harga_jual,
+                        item.harga_jual,
                         escapeHtml(item.supplier),
                         html
                     ];

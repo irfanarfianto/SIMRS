@@ -21,7 +21,7 @@ class MasterItemsController extends Controller
 
     public function search(Request $request)
     {
-        $data_search = $this->filterQuery($request)->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier')->orderBy('id')->get();
+        $data_search = $this->filterQuery($request)->select('kode', 'nama', 'jenis', 'harga_beli', 'laba', 'supplier')->orderBy('id')->get()->append('harga_jual');
 
         return json_encode([
             'status' => 200,

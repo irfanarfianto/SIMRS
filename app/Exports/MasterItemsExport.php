@@ -39,7 +39,7 @@ class MasterItemsExport implements FromQuery, WithHeadings, WithMapping, WithCol
             $item->supplier,
             $item->harga_beli,
             $item->laba,
-            (int) round($item->harga_beli + $item->harga_beli * $item->laba / 100),
+            $item->harga_jual,
         ];
     }
 

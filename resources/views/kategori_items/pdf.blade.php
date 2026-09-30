@@ -119,7 +119,7 @@
                 <td>{{ $item->supplier }}</td>
                 <td class="angka">{{ number_format($item->harga_beli, 0, ',', '.') }}</td>
                 <td class="angka">{{ $item->laba }}</td>
-                <td class="angka">{{ number_format(round($item->harga_beli + $item->harga_beli * $item->laba / 100), 0, ',', '.') }}</td>
+                <td class="angka">{{ number_format($item->harga_jual, 0, ',', '.') }}</td>
             </tr>
             @empty
             <tr>

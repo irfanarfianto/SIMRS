@@ -18,4 +18,10 @@ class MasterItem extends Model
     {
         return $this->belongsToMany(KategoriItem::class);
     }
+
+    // Satu-satunya rumus harga jual: dipakai index, halaman view, PDF, dan Excel
+    public function getHargaJualAttribute()
+    {
+        return (int) round($this->harga_beli + $this->harga_beli * $this->laba / 100);
+    }
 }
