@@ -25,7 +25,7 @@
                     </table>
                     <a class="btn btn-info" href="{{url('kategori-items/form/edit')}}/{{$data->id}}">Edit</a>
                     <a class="btn btn-success" href="{{url('kategori-items/pdf')}}/{{$data->id}}">Download PDF</a>
-                    <a class="btn btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#modal-konfirmasi-hapus" data-url="{{url('kategori-items/delete')}}/{{$data->id}}" data-pesan="Yakin ingin menghapus kategori {{ $data->nama }}? Item tidak ikut terhapus, hanya dilepas dari kategori ini.">Delete</a>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-konfirmasi-hapus" data-url="{{url('kategori-items/delete')}}/{{$data->id}}" data-pesan="Yakin ingin menghapus kategori {{ $data->nama }}? Item tidak ikut terhapus, hanya dilepas dari kategori ini.">Delete</button>
 
                     <h5 class="mt-4">Daftar Item ({{ $data->items->count() }})</h5>
                     <table class="table table-striped">

@@ -60,7 +60,7 @@
                         </tr>
                     </table>
                     <a class="btn btn-info" href="{{url('master-items/form/edit')}}/{{$data->id}}">Edit</a>
-                    <a class="btn btn-danger" href="#" data-bs-toggle="modal" data-bs-target="#modal-konfirmasi-hapus" data-url="{{url('master-items/delete')}}/{{$data->id}}" data-pesan="Yakin ingin menghapus item {{ $data->nama }}?">Delete</a>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-konfirmasi-hapus" data-url="{{url('master-items/delete')}}/{{$data->id}}" data-pesan="Yakin ingin menghapus item {{ $data->nama }}?">Delete</button>
                 </div>
             </div>
         </div>
