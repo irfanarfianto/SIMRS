@@ -11,23 +11,29 @@
                 <div class="card-header">Kategori Item</div>
 
                 <div class="card-body">
-                    <table>
+                    <table class="mb-3">
                         <tr>
-                            <th>Nama</th>
-                            <td>:</td>
+                            <th class="pe-2">Nama</th>
+                            <td class="pe-2">:</td>
                             <td>{{$data->nama}}</td>
                         </tr>
                         <tr>
-                            <th>Kode</th>
-                            <td>:</td>
+                            <th class="pe-2">Kode</th>
+                            <td class="pe-2">:</td>
                             <td>{{$data->kode}}</td>
                         </tr>
                     </table>
-                    <a class="btn btn-info" href="{{url('kategori-items/form/edit')}}/{{$data->id}}">Edit</a>
-                    <a class="btn btn-success" href="{{url('kategori-items/pdf')}}/{{$data->id}}">Download PDF</a>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-konfirmasi-hapus" data-url="{{url('kategori-items/delete')}}/{{$data->id}}" data-pesan="Yakin ingin menghapus kategori {{ $data->nama }}? Item tidak ikut terhapus, hanya dilepas dari kategori ini.">Delete</button>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-info" href="{{url('kategori-items/form/edit')}}/{{$data->id}}">Edit</a>
+                        <a class="btn btn-success" href="{{url('kategori-items/pdf')}}/{{$data->id}}">Download PDF</a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-konfirmasi-hapus" data-url="{{url('kategori-items/delete')}}/{{$data->id}}" data-pesan="Yakin ingin menghapus kategori {{ $data->nama }}? Item tidak ikut terhapus, hanya dilepas dari kategori ini.">Delete</button>
+                    </div>
 
-                    <h5 class="mt-4">Daftar Item ({{ $data->items->count() }})</h5>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 mb-2">
+                        <h5 class="mb-0">Daftar Item ({{ $data->items->count() }})</h5>
+                        <a href="{{ url('master-items/form/new') }}?kategori={{ $data->id }}" class="btn btn-outline-primary btn-sm">+ Item di Kategori Ini</a>
+                    </div>
+                    <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -54,6 +60,7 @@
                             @endforelse
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>

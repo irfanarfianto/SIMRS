@@ -4,8 +4,9 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
+            @php $url_kembali = $method == 'edit' ? url('master-items/view/' . $item->kode) : url('master-items'); @endphp
             <div class="form-group mb-2">
-                <a href="{{url('master-items')}}" class="btn btn-secondary">Kembali ke Daftar Item</a>
+                <a href="{{ $url_kembali }}" class="btn btn-secondary">{{ $method == 'edit' ? 'Kembali ke Detail Item' : 'Kembali ke Daftar Item' }}</a>
             </div>
             <div class="card">
 

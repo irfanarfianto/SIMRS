@@ -67,7 +67,9 @@ class MasterItemsController extends Controller
         $data['daftar_jenis'] = MasterItem::DAFTAR_JENIS;
         $data['method'] = $method;
         $data['list_kategori'] = KategoriItem::orderBy('nama')->get();
-        $data['kategori_terpilih'] = old('kategori', $item ? $item->kategori->pluck('id')->all() : []);
+        // Item baru dari halaman kategori (?kategori=<id>): kategori itu langsung tercentang
+        $kategori_awal = $item ? $item->kategori->pluck('id')->all() : array_filter([(int) request('kategori')]);
+        $data['kategori_terpilih'] = old('kategori', $kategori_awal);
         return view('master_items.form.index', $data);
     }
 
@@ -130,7 +132,7 @@ class MasterItemsController extends Controller
         });
 
         $pesan = $method == 'new' ? 'Item ' . $data_item->nama . ' berhasil ditambahkan.' : 'Item ' . $data_item->nama . ' berhasil diperbarui.';
-        return redirect('master-items')->with('success', $pesan);
+        return redirect('master-items/view/' . $data_item->kode)->with('success', $pesan);
     }
 
     public function delete($id)

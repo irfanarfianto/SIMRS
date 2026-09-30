@@ -1,4 +1,4 @@
-<form method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data" data-cegah-ganda>
     @csrf
     @if ($errors->any())
     <div class="alert alert-danger">
@@ -85,6 +85,9 @@
         <small class="text-muted">Format JPG, PNG, atau WEBP, maksimal 2 MB.@if(!empty($item->foto)) Kosongkan bila tidak ingin mengganti foto.@endif</small>
     </div>
 
-    <button class="btn btn-primary mt-3">Submit</button>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+        <button type="submit" class="btn btn-primary">Simpan</button>
+        <a href="{{ $url_kembali }}" class="btn btn-outline-secondary">Batal</a>
+    </div>
 
 </form>

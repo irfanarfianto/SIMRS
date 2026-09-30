@@ -89,6 +89,7 @@
     </div>
     @include('layouts.partials.toast')
     @include('layouts.partials.confirm-delete')
+    @include('layouts.partials.cegah-submit-ganda')
     @yield('js')
 </body>
 
